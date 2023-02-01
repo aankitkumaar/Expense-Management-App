@@ -1,30 +1,43 @@
-const express= require("express")
-const colors= require("colors")
-const morgan= require("morgan")
+const express= require('express');
+const cors= require('cors')
+const morgan= require('morgan')
+const colors= require('colors')
 const dotenv= require('dotenv')
-const connectDB = require("./config/db")
+const connectDb = require('./config/connectDb');
+const path= require('path')
+// config dot env file
+dotenv.config();
 
-//dotenv config
-dotenv.config()
 
-//mongoDB connection
-connectDB();
+//database call
+connectDb()
 
-//rest object
+// rest object
 const app= express();
 
-
-//middleware
-app.use(express.json())
+// middlewares
 app.use(morgan('dev'))
-
+app.use(express.json())
+app.use(cors())
 
 //routes
-app.use('/api/v1/user',require('./routes/userRoutes') )
+//user routes
+app.use('/api/v1/users', require('./routes/userRoute'))
+
+// transaction routes
+app.use("/api/v1/transactions", require("./routes/transactionRoute"))
+
+
+// port
+app.use(express.static(path.join(__dirname,'./client/build')))
+app.get('*',function(req,res){
+   res.sendFile(path.join(__dirname,'./client/build/index.html'));
+});
 
 //port
-const port= process.env.PORT || 8080
-//listen port
-app.listen(port, ()=>{
-    console.log(`server running in ${process.env.NODE_MODE} Mode on port ${process.env.PORT} `.bgCyan.white)
-})
+const port= 8080 || process.env.PORT
+
+//listen server
+ app.listen(port, ()=>{
+    console.log(`Server running on port ${port}`)
+ })
